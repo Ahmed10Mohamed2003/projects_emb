@@ -1,0 +1,49 @@
+#ifndef EXTI_INTERFACE_H_
+#define EXTI_INTERFACE_H_
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "EXTI_config.h"
+#include "EXTI_private.h"
+#include "MCAL/DIO/DIO_interface.h"
+
+
+typedef enum
+{
+	ENABLED=0,
+	DISABLED
+}MODE_e;
+
+typedef enum
+{
+	EXT_INT0=0,
+	EXT_INT1,
+	EXT_INT2
+}INTNUM_e;
+
+typedef enum
+{
+	LOW_LEVEL=0,
+	ON_CHANGE,
+	FALLING_EDGE,
+	RISING_EDGE
+}SENSTIVITY_e;
+
+#define OK  1
+#define NOK 0
+
+void EXTI_voidEnableDisable(INTNUM_e Copy_eIntNum,
+		MODE_e Copy_eMode);
+
+void EXTI_voidSetSenseCtrl(INTNUM_e Copy_eIntNum,
+		SENSTIVITY_e Copy_eSenseCtrl);
+
+
+
+u8 EXTI_voidSetCallBack(INTNUM_e Copy_eIntNum,
+		void (*LocalPtrFunc)(void));
+
+
+
+
+
+#endif

@@ -1,0 +1,94 @@
+/*
+ * LM35_program.c
+ *
+ *  Created on: 31 Jul 2025
+ *      Author: Ahmed Mokhtar
+ */
+#include <HAL/LM35/LM35_config.h>
+#include <HAL/LM35/LM35_interface.h>
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include"MCAL/DIO/DIO_private.h"
+#include <util/delay.h>
+#include "MCAL/DIO/DIO_interface.h"
+#include "MCAL/ADC/ADC_interface.h"
+
+f32 LM35_Read_Tempreture(void)
+{
+	    //LM_35
+	    ADC_voidInit();
+	    DIO_u8SetPinDirection (DIO_u8_PORTA, ADC_PIN ,DIO_u8_INPUT);
+	    u32 sum = 0;
+		u16 reading;
+		for (u8 i = 0; i < 10; i++)
+		{
+			ADC_u16ConvertSynch(ADC_PIN, &reading);
+			sum += reading;
+			_delay_ms(5);
+		}
+		f32 avg = sum / 10.0f;
+		f32 voltage = (avg * 5.0f) / 1024.0f;
+
+		return voltage * 100.0f; // °C
+}
+void floatToString(f32 num, u8 *str, u8 precision)
+{
+    int intPart;
+    unsigned long fracPart;
+    unsigned char i = 0;
+
+    // Handle negative numbers
+    if (num < 0)
+    {
+        str[i++] = '-';
+        num = -num;
+    }
+
+    // Extract integer part
+    intPart = (int)num;
+
+    // Convert integer part to string
+    int temp = intPart;
+    char intStr[10];
+    unsigned char intLen = 0;
+
+    if (temp == 0)
+    {
+        intStr[intLen++] = '0';
+    }
+    else
+    {
+        while (temp > 0)
+        {
+            intStr[intLen++] = (temp % 10) + '0';
+            temp /= 10;
+        }
+    }
+
+    // Reverse integer part into output string
+    for (int j = intLen - 1; j >= 0; j--)
+    {
+        str[i++] = intStr[j];
+    }
+
+    str[i++] = '.'; // decimal point
+
+    // Extract fractional part
+    fracPart = (unsigned long)((num - intPart) * 1000000); // up to 6 decimals
+    for (unsigned char p = 0; p < precision; p++)
+    {
+        fracPart /= 10; // reduce to desired precision
+    }
+
+    // Convert fractional part to string
+    for (unsigned char p = 0; p < precision; p++)
+    {
+        fracPart *= 10;
+        str[i++] = (fracPart / 1000000) + '0';
+        fracPart %= 1000000;
+    }
+
+    str[i] = '\0'; // null terminate
+}
+

@@ -1,0 +1,100 @@
+#include "TIMER0_interface.h"
+
+static void(*GlobalPtrFuncNormal)(void)=NULL;
+static void(*GlobalPtrFuncCompare)(void)=NULL;
+
+void TIMER0_voidInit()
+{
+
+	//Timer Mode -> WG BITS-> Interrupt source
+#if TIMER_MODE == NORMAL_MODE
+	CLR_BIT(TCCR0,3);
+	CLR_BIT(TCCR0,6);
+	SET_BIT(TIMSK,0);
+#elif TIMER_MODE == CTC_MODE
+	SET_BIT(TCCR0,3);
+	CLR_BIT(TCCR0,6);
+	SET_BIT(TIMSK,1);
+#elif TIMER_MODE == FAST_PWM
+	SET_BIT(TCCR0,3);
+	SET_BIT(TCCR0,6);
+
+#else
+#error("Wrong Timer Mode Configuration");
+#endif
+	//Configure PreScaler
+#if PRE_SCALER == DIV_8
+	TCCR0 &= 0b11111000;
+	TCCR0 |= DIV_8;
+#elif PRE_SCALER==DIV_64
+	TCCR0 &=0b11111000;
+	TCCR0 |=DIV_64;
+#else
+#error("Wrong PreScaler Option");
+#endif
+
+}
+void TIMER0_voidSetPreLoadTicks(u8 Copy_u8Ticks)
+{
+	TCNT0=Copy_u8Ticks;
+}
+void TIMER0_voidSetOcrTicks(u8 Copy_u8Ticks)
+{
+	OCR0=Copy_u8Ticks;
+}
+u8 TIMER0_eSetCallBackNormal(void (*Pfunc)(void))
+{
+	u8 Local_ErrorStatus = STD_TYPES_OK;
+	if(Pfunc!=NULL)
+	{
+		GlobalPtrFuncNormal = Pfunc;
+	}
+	else
+	{
+		Local_ErrorStatus = STD_TYPES_NOK;
+	}
+	return Local_ErrorStatus;
+}
+u8 TIMER0_eSetCallBackCompare(void (*Pfunc)(void))
+{
+	u8 Local_ErrorStatus = STD_TYPES_OK;
+	if(Pfunc!=NULL)
+	{
+		GlobalPtrFuncCompare=Pfunc;
+	}
+	else
+	{
+		Local_ErrorStatus= STD_TYPES_NOK;
+	}
+	return Local_ErrorStatus;
+}
+
+void FASTPWM_voidInvOrNoninv(PWM_mode_e Copy_Mode)
+{
+	switch(Copy_Mode)
+	{
+	case NON_INV:
+		CLR_BIT(TCCR0,4);
+		SET_BIT(TCCR0,5);
+		break;
+	case INV:
+		SET_BIT(TCCR0,4);
+		SET_BIT(TCCR0,5);
+		break;
+	}
+}
+//vector of over flow
+void __vector_11(void)  __attribute__((signal));
+void __vector_11(void)
+{
+	GlobalPtrFuncNormal();
+}
+
+//vector of compare match
+void __vector_10(void)  __attribute__((signal));
+void __vector_10(void)
+{
+	GlobalPtrFuncCompare();
+}
+
+

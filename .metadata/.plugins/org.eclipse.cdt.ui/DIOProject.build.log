@@ -1,0 +1,40 @@
+11:19:10 **** Incremental Build of configuration Debug for project DIOProject ****
+make all 
+Building file: F:/iti_AVR/projects_emb/library/HAL/DCMOTOR/DCMOTOR_program.c
+Invoking: AVR Compiler
+avr-gcc -I"F:\iti_AVR\projects_emb\library" -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=8000000UL -MMD -MP -MF"library/HAL/DCMOTOR/DCMOTOR_program.d" -MT"library/HAL/DCMOTOR/DCMOTOR_program.o" -c -o "library/HAL/DCMOTOR/DCMOTOR_program.o" "F:/iti_AVR/projects_emb/library/HAL/DCMOTOR/DCMOTOR_program.c"
+In file included from F:/iti_AVR/projects_emb/library/HAL/DCMOTOR/DCMOTOR_program.c:13:
+f:/iti_avr/03- imt sdk/imt_sdk_win_64/winavr/lib/gcc/../../avr/include/util/delay.h:90:3: warning: #warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+Finished building: F:/iti_AVR/projects_emb/library/HAL/DCMOTOR/DCMOTOR_program.c
+ 
+Building target: DIOProject.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,DIOProject.map -mmcu=atmega32 -o "DIOProject.elf"  ./library/MCAL/DIO/DIO_program.o  ./library/LIB/delay.o  ./library/HAL/SSD/HAL_SSD.o  ./library/HAL/LCD/LCD_program.o  ./library/HAL/KPD/KPD_program.o  ./library/HAL/DCMOTOR/DCMOTOR_program.o  ./main.o   
+Finished building target: DIOProject.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S DIOProject.elf  >"DIOProject.lss"
+Finished building: DIOProject.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex DIOProject.elf  "DIOProject.hex"
+Finished building: DIOProject.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 DIOProject.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:   11774 bytes (35.9% Full)
+(.text + .data + .bootloader)
+
+Data:         92 bytes (4.5% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+11:19:11 Build Finished (took 1s.43ms)
+

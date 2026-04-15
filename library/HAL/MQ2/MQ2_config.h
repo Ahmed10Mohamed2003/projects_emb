@@ -1,0 +1,14 @@
+/*
+ * MQ2_config.h
+ *
+ *  Created on: 2 Aug 2025
+ *      Author: Amr Elomda
+ */
+
+#ifndef HAL_MQ2_MQ2_CONFIG_H_
+#define HAL_MQ2_MQ2_CONFIG_H_
+
+
+#define MQ2_PIN DIO_u8_PIN1
+
+#endif /* HAL_MQ2_MQ2_CONFIG_H_ */

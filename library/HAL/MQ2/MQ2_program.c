@@ -1,0 +1,31 @@
+/*
+ * MQ2_program.c
+
+ *
+ *  Created on: 2 Aug 2025
+ *      Author: Ahmed Mokhtar
+ */
+#include <HAL/MQ2/MQ2_config.h>
+#include <HAL/MQ2/MQ2_interface.h>
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include"MCAL/DIO/DIO_private.h"
+#include <util/delay.h>
+#include "MCAL/DIO/DIO_interface.h"
+#include "MCAL/ADC/ADC_interface.h"
+#define V_REF 1500.00
+u8 MQ2_IsThierGasLeakage(void)
+{
+	ADC_voidInit();
+	DIO_u8SetPinDirection (DIO_u8_PORTA, MQ2_PIN ,DIO_u8_INPUT);
+
+	u16 reading;
+	ADC_u16ConvertSynch(MQ2_PIN,&reading);
+	f32 voltage =reading*2.1;
+	if(voltage>V_REF)
+		return 1;
+
+	return 0;
+}
+

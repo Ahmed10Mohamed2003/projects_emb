@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Ctc/library/HAL/BUZZER/BUUZER_config.h&apos; to &apos;BUZZER_config.h&apos;" description="Rename resource &apos;BUUZER_config.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="library/HAL/BUZZER/BUUZER_config.h" name="BUZZER_config.h" stamp="1754115978470" updateReferences="true"/>
+</session>

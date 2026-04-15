@@ -1,0 +1,105 @@
+#include "LIB/STD_TYPES.h"
+#include "MCAL/TWI/TWI_interface.h"
+#include "HAL/EEPROM/EEPROM_Interface.h"
+#include "HAL/EEPROM/EEPROM_Config.h"
+#include "HAL/EEPROM/EEPROM_Private.h"
+
+/* Helper: Wait until EEPROM internal write cycle is complete */
+static void EEPROM_WaitForWriteCycle(u8 deviceAddr)
+{
+    u8 status;
+    do
+    {
+        /* Send START */
+        TWI_ErrorStatusSendStartConditionWithACK();
+
+        /* Try to address EEPROM in WRITE mode */
+        status = TWI_ErrorStatusSendSlaveAddressWithWriteACK(deviceAddr);
+
+        /* Always send STOP (important to release bus) */
+        TWI_voidSendStopCondition();
+
+    } while (status != NoError);
+}
+
+/* Initialize EEPROM */
+void EEPROM_voidInit(void)
+{
+    /* Set TWI to Master mode at 100kHz */
+    TWI_voidInitMaster(100000UL);
+}
+
+/* Write 1 byte */
+void EEPROM_voidSendDataByte(u16 Copy_u16LocationAddress, u8 Copy_u8DataByte)
+{
+    u8 Local_u8AddressPacket;
+
+    Local_u8AddressPacket = EEPROM_FIXED_ADDRESS
+                          | (A2_CONNECTION << 2)
+                          | (u8)(Copy_u16LocationAddress >> 8);
+
+    /* Send START */
+    TWI_ErrorStatusSendStartConditionWithACK();
+
+    /* Send device address (WRITE) */
+    TWI_ErrorStatusSendSlaveAddressWithWriteACK(Local_u8AddressPacket);
+
+    /* Send memory address low byte */
+    TWI_ErrorStatusMasterWriteDataByteWithACK((u8)Copy_u16LocationAddress);
+
+    /* Send data */
+    TWI_ErrorStatusMasterWriteDataByteWithACK(Copy_u8DataByte);
+
+    /* STOP */
+    TWI_voidSendStopCondition();
+
+    /* Wait for EEPROM to finish writing */
+    EEPROM_WaitForWriteCycle(Local_u8AddressPacket);
+}
+
+/* Read multiple bytes */
+void EEPROM_u8ReadDataBytes(u16 Copy_u16StartAddress, u8 *Copy_pu8Buffer, u16 Copy_u16Length)
+{
+    u8 Local_u8AddressPacket;
+    u16 i;
+
+    Local_u8AddressPacket = EEPROM_FIXED_ADDRESS
+                          | (A2_CONNECTION << 2)
+                          | (u8)(Copy_u16StartAddress >> 8);
+
+    /* Ensure EEPROM is ready (important if reading right after writing) */
+    EEPROM_WaitForWriteCycle(Local_u8AddressPacket);
+
+    /* START */
+    TWI_ErrorStatusSendStartConditionWithACK();
+
+    /* Device address (WRITE) */
+    TWI_ErrorStatusSendSlaveAddressWithWriteACK(Local_u8AddressPacket);
+
+    /* Memory address low byte */
+    TWI_ErrorStatusMasterWriteDataByteWithACK((u8)Copy_u16StartAddress);
+
+    /* REPEATED START */
+    TWI_ErrorStatusSendRepeatedStartConditionWithACK();
+
+    /* Device address (READ) */
+    TWI_ErrorStatusSendSlaveAddressWithReadACK(Local_u8AddressPacket);
+
+    /* Read bytes */
+    for (i = 0; i < Copy_u16Length; i++)
+    {
+        if (i < (Copy_u16Length - 1))
+        {
+            /* Read with ACK to continue */
+            TWI_ErrorStatusMasterReadDataByteWithACK(&Copy_pu8Buffer[i]);
+        }
+        else
+        {
+            /* Last byte: read with NACK */
+            TWI_ErrorStatusMasterReadDataByteWithNACK(&Copy_pu8Buffer[i]);
+        }
+    }
+
+    /* STOP */
+    TWI_voidSendStopCondition();
+}

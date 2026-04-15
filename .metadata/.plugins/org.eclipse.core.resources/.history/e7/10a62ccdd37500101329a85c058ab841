@@ -1,0 +1,76 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+#define SERVO_PIN     PD5
+#define BUTTON_PIN    PB2
+
+volatile uint8_t door_state = 0; // 0 = closed, 1 = open
+
+// ====== TIMER1 (Servo PWM) Init ======
+void Timer1_Init(void)
+{
+    // Fast PWM, mode 14 (ICR1 top), non-inverted on OC1A
+    TCCR1A = (1 << WGM11) | (1 << COM1A1);
+    TCCR1B = (1 << WGM12) | (1 << WGM13) | (1 << CS11); // prescaler = 8
+
+    ICR1 = 20000; // 20ms period for servo (50Hz)
+}
+
+// ====== Servo control ======
+void Servo_SetAngle(uint8_t angle)
+{
+    if (angle > 180) angle = 180;
+    OCR1A = 1000 + ((uint32_t)angle * 1000) / 180;
+}
+
+// ====== Door control ======
+void Door_Open(void)
+{
+    Servo_SetAngle(180);
+}
+
+void Door_Close(void)
+{
+    Servo_SetAngle(0);
+}
+
+// ====== External Interrupt Init ======
+void ExtInt_Init(void)
+{
+    // INT2 on falling edge
+    EICRA |= (1 << ISC21);
+    EICRA &= ~(1 << ISC20);
+
+    EIMSK |= (1 << INT2); // enable INT2
+}
+
+// ====== Button/Servo Pin Init ======
+void IO_Init(void)
+{
+    // Servo pin output
+    DDRD |= (1 << SERVO_PIN);
+
+    // Button pin input with pull-up
+    DDRB &= ~(1 << BUTTON_PIN);
+    PORTB |= (1 << BUTTON_PIN);
+}
+
+// ====== Interrupt Service Routine ======
+ISR(INT2_vect)
+{
+    door_state ^= 1; // toggle state
+    if (door_state)
+        Door_Open();
+    else
+        Door_Close();
+}
+
+// ====== Main init function ======
+void Door_Init(void)
+{
+    IO_Init();
+    Timer1_Init();
+    ExtInt_Init();
+    sei(); // enable global interrupt
+}

@@ -1,0 +1,20 @@
+09:43:13 **** Incremental Build of configuration Debug for project Ctc ****
+make all 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 Ctc.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:   11306 bytes (34.5% Full)
+(.text + .data + .bootloader)
+
+Data:        377 bytes (18.4% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+09:43:13 Build Finished (took 370ms)
+

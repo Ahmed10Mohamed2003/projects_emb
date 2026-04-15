@@ -1,0 +1,33 @@
+13:29:22 **** Incremental Build of configuration Debug for project hello_project ****
+make all 
+Building target: hello_project.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,hello_project.map -mmcu=atmega32 -o "hello_project.elf"  ./main.o   
+Finished building target: hello_project.elf
+ 
+Invoking: AVR Create Extended Listing
+avr-objdump -h -S hello_project.elf  >"hello_project.lss"
+Finished building: hello_project.lss
+ 
+Create Flash image (ihex format)
+avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex hello_project.elf  "hello_project.hex"
+Finished building: hello_project.hex
+ 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 hello_project.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:     294 bytes (0.9% Full)
+(.text + .data + .bootloader)
+
+Data:         18 bytes (0.9% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+13:29:23 Build Finished (took 964ms)
+

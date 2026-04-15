@@ -1,0 +1,61 @@
+/*
+ * TIMER1_program.c
+ *
+ *  Created on: Oct 18, 2024
+ *      Author: yousef.ahmed
+ */
+
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "TIMER1_interface.h"
+#include "TIMER1_config.h"
+#include "TIMER1_private.h"
+
+
+static void(*GlobalPtrFuncCompare)(void)=NULL;
+
+void TIMER1_voidInit()
+{
+	//SELECT REQ MODE->15
+	CLR_BIT(TCCR1A,0);
+	SET_BIT(TCCR1A,1);
+	SET_BIT(TCCR1B,3);
+	SET_BIT(TCCR1B,4);
+	//NON-INVERTED MODE
+	CLR_BIT(TCCR1A,6);
+	SET_BIT(TCCR1A,7);
+	//ICR =20000
+	ICR1=20000;
+	//PRESCALER->8
+	CLR_BIT(TCCR1B,0);
+	SET_BIT(TCCR1B,1);
+	CLR_BIT(TCCR1B,2);
+}
+void TIMER1_voidInit_OC1B(void)
+{
+    // Fast PWM mode 14 (ICR1 top), non-inverted on OC1B
+    TCCR1A = (1 << WGM11) | (1 << COM1B1);
+    TCCR1B = (1 << WGM12) | (1 << WGM13) | (1 << CS11); // Prescaler = 8
+
+    ICR1 = 20000; // 20ms period for 50Hz servo
+}
+
+u8 TIMER1_eSetCallBackNormal(void (*Pfunc)(void))
+{
+	u8 Local_ErrorStatus =OK;
+	if(Pfunc!=NULL)
+	{
+		GlobalPtrFuncCompare=Pfunc;
+	}
+	else
+	{
+		Local_ErrorStatus=NOK;
+	}
+	return Local_ErrorStatus;
+}
+
+void __vector_9(void) __attribute__((signal)); // Timer1 Compare A Match
+void __vector_9(void)
+{
+	GlobalPtrFuncCompare();
+}

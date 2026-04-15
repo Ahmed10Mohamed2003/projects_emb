@@ -1,0 +1,40 @@
+/*
+ * LEDS_program.c
+ *
+ *  Created on: 5 Aug 2025
+ *      Author: Amr Elomda
+ */
+
+#include "MCAL/DIO/DIO_interface.h"
+#include "LEDS_config.h"
+#include "LEDS_interface.h"
+#include "MCAL/EXTI/EXTI_interface.h"
+
+static void ISR_INT1(void);
+void Leds_voidInit(void)
+{
+
+	    // using external interrupt to control LEDS  using button
+	    DIO_u8SetPinDirection(DIO_u8_PORTD,LEDS_INT_PIN,DIO_u8_INPUT);
+	    DIO_u8SetPinValue(DIO_u8_PORTD,LEDS_INT_PIN,DIO_u8_HIGH);
+	    EXTI_voidEnableDisable(EXT_INT1, ENABLED);
+	    EXTI_voidSetSenseCtrl(EXT_INT1, FALLING_EDGE);
+	    EXTI_voidSetCallBack(EXT_INT1, ISR_INT1);
+	    //LEDS pin init
+	    DIO_u8SetPinDirection(LEDS_PORT,LEDS_PIN,DIO_u8_OUTPUT);
+	    DIO_u8SetPinValue(LEDS_PORT,LEDS_PIN,DIO_u8_LOW);
+	    GI_voidEnable();
+
+}
+void Leds_voidTurnOn(void)
+{
+	 DIO_u8SetPinValue(LEDS_PORT,LEDS_PIN,DIO_u8_HIGH);
+}
+void Leds_voidTurnOff(void)
+{
+	 DIO_u8SetPinValue(LEDS_PORT,LEDS_PIN,DIO_u8_LOW);
+}
+static void ISR_INT1(void)
+{
+	DIO_u8TogglePinValue(LEDS_PORT,LEDS_PIN);
+}

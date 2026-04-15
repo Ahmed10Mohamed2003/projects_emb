@@ -1,0 +1,72 @@
+/*
+ * Fan_programm.c
+
+ *
+ *  Created on: Aug 2, 2025
+ *      Author: Osama Abdelmonem
+ */
+
+#include "Fan_interface.h"
+
+
+static u8 level = 0;
+static void ISR_INT0(void);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void  Fan_voidInit(void)
+{
+	// using TIMER0 to control in dc motor speed
+	DIO_u8SetPinDirection(DIO_u8_PORTB,DIO_u8_PIN3,DIO_u8_OUTPUT);
+	DIO_u8SetPinDirection(DIO_u8_PORTB,DIO_u8_PIN2,DIO_u8_INPUT);
+	DIO_u8SetPinValue(DIO_u8_PORTB,DIO_u8_PIN2,DIO_u8_HIGH);
+		TIMER0_voidInit();
+		FASTPWM_voidInvOrNoninv(INV);
+	// using external interrupt to control fan speed using button
+		EXTI_voidEnableDisable(EXT_INT0, ENABLED);
+		EXTI_voidSetSenseCtrl(EXT_INT0, LOW_LEVEL);
+		EXTI_voidSetCallBack(EXT_INT0, ISR_INT0);
+
+
+
+
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void    Fan_u8StopFan()
+{
+	TIMER0_voidSetOcrTicks(DUTY_CYCLE_0);
+
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+u8    Fan_u8ControlDCmotorSpeed(_spedd_t _speed_fan)
+{
+	u8 ret_value = STD_TYPES_OK;
+	switch(_speed_fan)
+	{
+
+	    case SPEED_0 : { TIMER0_voidSetOcrTicks(DUTY_CYCLE_0);    level = SPEED_0;    }      break;
+		case SPEED_1 : { TIMER0_voidSetOcrTicks(DUTY_CYCLE_30);   level = SPEED_1;    }      break;
+		case SPEED_2 : { TIMER0_voidSetOcrTicks(DUTY_CYCLE_50);   level = SPEED_2;    }      break;
+		case SPEED_3 : { TIMER0_voidSetOcrTicks(DUTY_CYCLE_100);  level = SPEED_3;    }      break;
+		default      :  ret_value  = STD_TYPES_NOK  ;
+
+	}
+	return ret_value;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void ISR_INT0(void)
+{
+	switch(level)
+	{
+
+	case SPEED_0 : {  TIMER0_voidSetOcrTicks(DUTY_CYCLE_30);    level = SPEED_1; }   break;
+	case SPEED_1 : {  TIMER0_voidSetOcrTicks(DUTY_CYCLE_50);    level = SPEED_2; }   break;
+	case SPEED_2 : {  TIMER0_voidSetOcrTicks(DUTY_CYCLE_100);   level = SPEED_3; }   break;
+	case SPEED_3 : {  TIMER0_voidSetOcrTicks(DUTY_CYCLE_0);     level = SPEED_0; }   break;
+
+
+	}
+
+}

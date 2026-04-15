@@ -1,0 +1,119 @@
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/UART/UART_interface.h"
+#include "MCAL/UART/UART_private.h"
+#include "MCAL/UART/UART_config.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include <avr/interrupt.h>
+#include "HAL/DOOR/DOOR_interface.h"
+#include "HAL/FAN/Fan_interface.h"
+#include "HAL/LEDS/LEDS_interface.h"
+
+volatile static u8 Global_u8ReceivedData = 0;
+volatile static u8 Global_u8ReceivedFlag = 0;
+
+volatile static u8 Global_u8TransmitData = 0;
+volatile static u8 Global_u8TransmitFlag = 0;
+
+void UART_voidInit()
+{
+    // Set RX (PD0) as input, TX (PD1) as output
+    DIO_u8SetPinDirection(DIO_u8_PORTD, DIO_u8_PIN0, DIO_u8_INPUT);
+    DIO_u8SetPinDirection(DIO_u8_PORTD, DIO_u8_PIN1, DIO_u8_OUTPUT);
+
+    // Set frame: 8-bit data, 1 stop bit, no parity
+    u8 Local_u8RC_config = 0;
+    CLR_BIT(Local_u8RC_config, 3);  // Asynchronous mode
+    SET_BIT(Local_u8RC_config, 1);  // UCSZ0 = 1
+    SET_BIT(Local_u8RC_config, 2);  // UCSZ1 = 1
+    SET_BIT(Local_u8RC_config, 7);  // URSEL = 1 (select UCSRC)
+    UCSRC = Local_u8RC_config;
+
+    // Baud Rate: 9600 @ 16MHz
+    UBRRL = 51;
+
+    // Enable TX, RX, and interrupts
+    SET_BIT(UCSRB, 3);  // TXEN
+    SET_BIT(UCSRB, 4);  // RXEN
+    SET_BIT(UCSRB, 7);  // RXCIE (Receive Complete Interrupt Enable)
+    SET_BIT(UCSRB, 6);  // TXCIE (Transmit Complete Interrupt Enable)
+
+    // Enable global interrupt
+    sei();
+}
+
+void UART_voidSendData(u8 Copy_u8Data)
+{
+    Global_u8TransmitData = Copy_u8Data;
+    Global_u8TransmitFlag = 1;
+
+    // Put data into buffer to start transmission
+    UDR = Global_u8TransmitData;
+
+    // Wait until transmission complete (interrupt will clear flag)
+    while (Global_u8TransmitFlag == 1);
+
+}
+
+u8 UART_u8Receive()
+{
+    while (Global_u8ReceivedFlag == 0);
+    Global_u8ReceivedFlag = 0;
+    return Global_u8ReceivedData;
+}
+
+// ISR for Receive Complete
+ISR(USART_RXC_vect)
+{
+ Global_u8ReceivedData = UDR;
+ Global_u8ReceivedFlag = 1;
+
+ switch (UART_u8Receive())
+{
+ // ---------------- FAN CONTROL ----------------
+ case 'a':
+	 Fan_u8StopFan();
+
+ break;
+
+ case 'b':
+	 Fan_u8ControlDCmotorSpeed(1);
+ break;
+
+ case 'e':
+	 Fan_u8ControlDCmotorSpeed(2);
+ break;
+
+ case 'd':
+	 Fan_u8ControlDCmotorSpeed(3);
+ break;
+
+ // ---------------- LED CONTROL ----------------
+ case 'n': // Turn ON LED
+	 Leds_voidTurnOn();
+ break;
+
+case 'p': // Turn OFF LED
+	Leds_voidTurnOff();
+ break;
+
+ // --------------- SERVO CONTROL ---------------
+case 'o': // Open door
+	Open_voidDoor();
+ break;
+
+ case 'c': // Close door
+	 Close_voidDoor();
+ break;
+
+ default:
+    /*Do Nothing*/
+ break;
+ }
+}
+
+// ISR for Transmit Complete
+ISR(USART_TXC_vect)
+{
+    Global_u8TransmitFlag = 0;
+}

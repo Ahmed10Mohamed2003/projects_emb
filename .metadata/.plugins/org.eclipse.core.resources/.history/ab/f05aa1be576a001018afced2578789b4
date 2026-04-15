@@ -1,0 +1,64 @@
+/*
+ * main.c
+ *
+ *  Created on: 23 Jul 2025
+ *      Author: Amr Elomda
+ */
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "HAL/SSD/HAL_SSD.h"
+#include "HAL/LCD/LCD_interface.h"
+#include "HAL/KPD/KPD_interface.h"
+#include "HAL/DCMOTOR/DCMOTOR_interface.h"
+#include "MCAL/EXTI/EXTI_interface.h"
+#include "MCAL/EXTI/GI_interface.h"
+#include <util/delay.h>
+#define CHARACTERS 1
+#define NUMBERS 0
+void func(void) ;
+
+volatile u8 flag=CHARACTERS;
+int main()
+{
+	DIO_voidInit();
+	LCD_voidInit();
+	KPD_voidInit();
+	//DIO_u8SetPinDirection(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_OUTPUT);
+	DIO_u8SetPinDirection(DIO_u8_PORTD,DIO_u8_PIN2,DIO_u8_INPUT);
+	DIO_u8SetPinValue(DIO_u8_PORTD, DIO_u8_PIN2, DIO_u8_HIGH);
+	void (*operation)(void) = func;
+
+
+	EXTI_voidSetSenseCtrl(INT0,RISING_EDGE);
+	EXTI_voidEnableDisable(INT0,ENABLED);
+	EXTI_voidSetCallBack(INT0,operation);
+	GI_voidEnable();
+
+
+	while(1)
+		{
+		u8 value=255;
+		while(value==255)
+		{
+			value=KPD_u8GetPressedKey();
+		}
+		if(flag==NUMBERS)
+		{
+			LCD_voidSendData(value+'0');
+		}
+		else
+		{
+			LCD_voidSendData('A'+(value-1));
+		}
+
+		}
+	return 0;
+}
+void func(void)
+		{
+ if(flag==NUMBERS)
+	 flag=CHARACTERS;
+ else
+	 flag=NUMBERS;
+
+}

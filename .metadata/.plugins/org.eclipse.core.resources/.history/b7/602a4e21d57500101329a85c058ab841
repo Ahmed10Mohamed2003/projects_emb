@@ -1,0 +1,87 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include "MCAL/EXTI/EXTI_interface.h"
+#define SERVO_PIN     PD5
+#define BUTTON_PIN    PB2
+
+volatile uint8_t door_state = 0; // 0 = closed, 1 = open
+ISR(INT2_vect);
+// ====== TIMER1 (Servo PWM) Init ======
+void Timer1_Init(void)
+{
+    // Fast PWM, mode 14 (ICR1 top), non-inverted on OC1A
+    TCCR1A = (1 << WGM11) | (1 << COM1A1);
+    TCCR1B = (1 << WGM12) | (1 << WGM13) | (1 << CS11); // prescaler = 8
+
+    ICR1 = 20000; // 20ms period for servo (50Hz)
+}
+
+// ====== Servo control ======
+void Servo_SetAngle(uint8_t angle)
+{
+    if (angle > 180) angle = 180;
+    OCR1A = 1000 + ((uint32_t)angle * 1000) / 180;
+}
+
+// ====== Door control ======
+void Door_Open(void)
+{
+    Servo_SetAngle(180);
+}
+
+void Door_Close(void)
+{
+    Servo_SetAngle(0);
+}
+
+// ====== External Interrupt Init ======
+void ExtInt_Init(void)
+{
+    // Configure INT2 pin as input with internal pull-up
+    DIO_u8SetPinDirection(DIO_u8_PORTB, DIO_u8_PIN2, DIO_u8_INPUT);
+    DIO_u8SetPinValue(DIO_u8_PORTB, DIO_u8_PIN2, DIO_u8_HIGH);
+
+    // Enable INT2
+    EXTI_voidEnableDisable(EXT_INT2, ENABLED);
+
+    // Set INT2 to trigger on falling edge
+    EXTI_voidSetSenseCtrl(EXT_INT2, FALLING_EDGE);
+
+    // Set the callback function for INT2
+    EXTI_voidSetCallBack(EXT_INT2, INT2_vect);
+
+    // Enable global interrupts
+    GI_voidEnable();
+}
+
+
+// ====== Button/Servo Pin Init ======
+void IO_Init(void)
+{
+    // Servo pin output
+    DDRD |= (1 << SERVO_PIN);
+
+    // Button pin input with pull-up
+    DDRB &= ~(1 << BUTTON_PIN);
+    PORTB |= (1 << BUTTON_PIN);
+}
+
+// ====== Interrupt Service Routine ======
+ISR(INT2_vect)
+{
+    door_state ^= 1; // toggle state
+    if (door_state)
+        Door_Open();
+    else
+        Door_Close();
+}
+
+// ====== Main init function ======
+void Door_Init(void)
+{
+    IO_Init();
+    Timer1_Init();
+    ExtInt_Init();
+    sei(); // enable global interrupt
+}

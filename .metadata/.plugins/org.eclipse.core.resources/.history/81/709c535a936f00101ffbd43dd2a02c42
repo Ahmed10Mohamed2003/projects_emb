@@ -1,0 +1,33 @@
+/*
+ * main.c
+ *
+ *  Created on: Aug 2, 2025
+ *      Author: Ahmed
+ */
+
+
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include "MCAL/DIO/DIO_Private.h"
+#include "HAL/DOOR/DOOR_interface.h"
+#include "MCAL/TIMER1/TIMER1_interface.h"
+#include <util/delay.h>
+#include <avr/interrupt.h>
+#include <stdio.h>
+
+int main(void)
+{
+    DIO_voidInit();
+    TIMER1_voidInit();
+    DIO_u8SetPinDirection(DIO_u8_PORTD, DIO_u8_PIN5, DIO_u8_OUTPUT);
+    while(1)
+    {
+    	Open_voidDoor();
+        _delay_ms(1000);
+
+
+        Close_voidDoor();
+        _delay_ms(1000);
+    }
+}

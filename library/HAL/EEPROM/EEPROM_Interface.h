@@ -1,0 +1,35 @@
+#ifndef EEPROM_INTERFACE_H_
+#define EEPROM_INTERFACE_H_
+
+#include "LIB/STD_TYPES.h"
+
+/* ================= Public Functions ================= */
+
+/**
+ * @brief Initialize the EEPROM driver (I2C hardware setup)
+ */
+void EEPROM_Init(void);
+
+/**
+ * @brief Write one byte to EEPROM
+ * @param memAddr Memory location address (0 - EEPROM size)
+ * @param data    Byte to write
+ */
+void EEPROM_WriteByte(u16 memAddr, u8 data);
+
+/**
+ * @brief Read one byte from EEPROM
+ * @param memAddr Memory location address
+ * @return The byte read from EEPROM
+ */
+u8 EEPROM_ReadByte(u16 memAddr);
+
+/**
+ * @brief Read multiple bytes from EEPROM
+ * @param startAddr Starting memory location address
+ * @param buffer    Pointer to array to store the read bytes
+ * @param length    Number of bytes to read
+ */
+void EEPROM_ReadBytes(u16 startAddr, u8 *buffer, u16 length);
+
+#endif /* EEPROM_INTERFACE_H_ */

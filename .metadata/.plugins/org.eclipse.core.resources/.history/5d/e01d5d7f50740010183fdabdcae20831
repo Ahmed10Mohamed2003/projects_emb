@@ -1,0 +1,47 @@
+/*
+ * EEPROM_program.c
+ *
+ *  Created on: Nov 1, 2024
+ *      Author: yousef.ahmed
+ */
+
+#include "STD_TYPES.h"
+#include "BIT_MATH.h"
+#include <util/delay.h>
+#include "I2C_interface.h"
+#include "EEPROM_interface.h"
+
+void EEPROM_voidWriteDataByte(u8 Copy_u8Data,
+		u16 Copy_u16Location,
+		u8 Copy_u8Device)
+{
+	u8 Local_u8Address;
+	Local_u8Address=(0b01010000)|
+			(Copy_u8Device<<2)|
+			(Copy_u16Location>>8);
+	TWI_voidSendStartCondition();
+	TWI_voidSendSlaveAddressWithWrite(Local_u8Address);
+	TWI_voidSendDataByte((u8)Copy_u16Location);
+	TWI_voidSendDataByte(Copy_u8Data);
+	TWI_voidSendStopCondition();
+	_delay_ms(5);
+	_delay_ms(5);
+}
+
+u8 EEPROM_u8ReadDataByte(u16 Copy_u16Location,
+		u8 Copy_u8Device)
+{
+	u8 Local_u8Data;
+	u8 Local_u8Address;
+	Local_u8Address=(0b01010000)|
+			(Copy_u8Device<<2)|
+			(Copy_u16Location>>8);
+	TWI_voidSendStartCondition();
+	TWI_voidSendSlaveAddressWithWrite(Local_u8Address);
+	TWI_voidSendDataByte((u8)Copy_u16Location);
+	TWI_voidSendStartCondition();
+	TWI_voidSendSlaveAddressWithRead(Local_u8Address);
+	Local_u8Data=TWI_u8ReadDataByte();
+	TWI_voidSendStopCondition();
+	return Local_u8Data;
+}

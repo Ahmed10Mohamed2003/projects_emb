@@ -1,0 +1,104 @@
+/*
+ * APP_program.c
+ *
+ *  Created on: 5 Aug 2025
+ *      Author: Amr Elomda
+ */
+#include "APP/APP_interface.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include "util/delay.h"
+
+u8 Gas_leakage_Last;
+void APP_voidInit(void)
+{
+	//ALL initialization
+
+	    DIO_u8SetPinValue(3,7,1);
+	    _delay_ms(1000);
+
+	    DIO_voidInit();
+
+	    EEPROM_Init();
+	    LCD_voidInit();
+	    KPD_voidInit();
+	    Fan_voidInit();
+	    Fan_u8StopFan();
+	    Leds_voidInit();
+	    Bluetooth_Init();
+	    Buzzer_Init();
+
+		/*EEPROM_voidSendDataByte(0,1);
+		EEPROM_voidSendDataByte(1,2);
+		EEPROM_voidSendDataByte(2,3);
+		EEPROM_voidSendDataByte(3,4);*/
+        //initialize number of Gas Leakage to Zero
+	    //EEPROM_voidSendDataByte(4,0);
+}
+u8 APP_voidLogin(void)
+{
+	u8 pass[5];
+	EEPROM_ReadBytes(0,pass,5);
+	Gas_leakage_Last=pass[4];
+	DIO_u8SetPinValue(3,7,0);
+	LCD_voidClearDisplay();
+	_delay_ms(2);
+	LCD_voidSetPosition(0,1);
+	LCD_voidSendString("Enter Password");
+	u8 pass_temp[5];
+	u8 flag=0;
+	for(u8 i=0;i<3;i++)
+	{
+
+		//LCD_voidSendData(' ');
+		for(u8 j=0;j<4;j++)
+		{
+			u8 key=255;
+			while(key==255)
+			{
+				key=KPD_u8GetPressedKey();}
+			if(flag==0)
+			{
+				LCD_voidClearDisplay();
+				LCD_voidSetPosition(0,3);
+				flag=1;
+			}
+
+			pass_temp[j]=key;
+			LCD_voidSendData('*');
+		}
+		if(pass_temp[0]==pass[0]&&pass_temp[1]==pass[1]&&pass_temp[2]==pass[2]&&pass_temp[3]==pass[3])
+		{
+			LCD_voidClearDisplay();
+			_delay_ms(2);
+			LCD_voidSendString("Correct Pass");
+			Door_voidinit();
+			Open_voidDoor();
+			return 1;
+		}
+		else
+		{
+			LCD_voidClearDisplay();
+			_delay_ms(2);
+			LCD_voidSendString("  Wrong!!");
+			LCD_voidSetPosition(1,3);
+			if(i<2)
+			{
+
+			LCD_voidSendString("Try Again : ");
+			}
+			else
+			{
+
+				LCD_voidSendString("Warning!!!!");
+				TurnON_Buzzer();
+				_delay_ms(7000);
+				return 0;
+			}
+			flag=0;
+
+		}
+	}
+
+}
+
+

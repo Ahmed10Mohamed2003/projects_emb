@@ -1,0 +1,50 @@
+#include "APP/APP_interface.h"
+#include"util/delay.h"
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include "HAL/EEPROM/EEPROM_Interface.h"
+#include "HAL/BLUETOOTH/BLUETOOTH_interface.h"
+#include "HAL/LCD/LCD_interface.h"
+#include "HAL/LEDS/LEDS_interface.h"
+#include "HAL/FAN/Fan_interface.h"
+#include "HAL/DOOR/DOOR_interface.h"
+#include "MCAL/EXTI/GI_interface.h"
+extern u8 Gas_leakage_Last;
+int main(void)
+{
+	APP_voidInit();
+	APP_voidLogin();
+	Open_voidDoor();
+    Fan_u8StopFan();
+    Door_voidinit();
+
+   while(1)
+   {
+	  if(MQ2_IsThierGasLeakage())
+	   {
+u8 counter[2];
+		   TurnON_Buzzer();
+		   _delay_ms(1000);
+		   TurnOFF_Buzzer();
+		   _delay_ms(1000);
+		   //store in EEPROM number of Gas Leakage
+		   Gas_leakage_Last++;
+		   //EEPROM_WriteByte(4,Gas_leakage_Last+1);
+		   EEPROM_ReadBytes(4,counter,1);
+		   counter[0]++;
+		   EEPROM_WriteByte(4,counter[0]);
+		   LCD_voidClearDisplay();
+		   	_delay_ms(2);
+		   	LCD_voidSendData(counter+'0');
+		   //TurnON_Buzzer();
+
+	   }
+	  //TurnON_Buzzer();
+
+  // LDR_voidUpdate();
+   }
+}
+
+
+

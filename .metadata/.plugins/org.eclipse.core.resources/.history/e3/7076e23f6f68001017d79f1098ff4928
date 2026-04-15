@@ -1,0 +1,70 @@
+/*
+ * DCMOTOR_program.c
+
+ *
+ *  Created on: 22 Jul 2025
+ *      Author: Amr Elomda
+ */
+#include <HAL/DCMOTOR/DCMOTOR_config.h>
+#include <HAL/DCMOTOR/DCMOTOR_interface.h>
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include <util/delay.h>
+void DCMOTOR_Toggle(void)
+{
+
+	TOG_BIT(DC_MOTOR_PORT,DC_MOTOR_PIN);
+
+}
+
+void DCMOTOR_OperateCW(u32 steps)
+{
+	for(u32 i=0;i<steps;i++)
+	{
+		DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_HIGH);
+		DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_LOW);
+		DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_LOW);
+		DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_LOW);
+		_delay_ms(10);
+		DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_LOW);
+				DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_HIGH);
+				DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_LOW);
+				DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_LOW);
+				_delay_ms(10);
+				DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_LOW);
+						DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_LOW);
+						DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_HIGH);
+						DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_LOW);
+						_delay_ms(10);
+						DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_LOW);
+								DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_LOW);
+								DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_LOW);
+								DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_HIGH);
+								_delay_ms(10);
+	}
+}
+void DCMOTOR_OperateCCW(u32 steps)
+{
+	DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_LOW);
+									DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_LOW);
+									DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_LOW);
+									DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_HIGH);
+									_delay_ms(10);
+									DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_LOW);
+															DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_LOW);
+															DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_HIGH);
+															DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_LOW);
+															_delay_ms(10);
+															DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_LOW);
+																			DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_HIGH);
+																			DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_LOW);
+																			DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_LOW);
+																			_delay_ms(10);
+																			DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN0,DIO_u8_HIGH);
+																					DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN1,DIO_u8_LOW);
+																					DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN2,DIO_u8_LOW);
+																					DIO_u8SetPinValue(DIO_u8_PORTA,DIO_u8_PIN3,DIO_u8_LOW);
+																					_delay_ms(10);
+}
+

@@ -1,0 +1,23 @@
+/*
+ * Fan_interface.h
+ *
+ *  Created on: Aug 2, 2025
+ *      Author: Osama Abdelmonem
+ */
+
+#ifndef HAL_FAN_FAN_INTERFACE_H_
+#define HAL_FAN_FAN_INTERFACE_H_
+
+#include "Fan_config.h"
+#include "Fan_private.h"
+#include "MCAL/EXTI/EXTI_interface.h"
+#include "MCAL/TIMER0/TIMER0_interface.h"
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+
+
+void  Fan_voidInit(void);
+void    Fan_u8StopFan();
+u8    Fan_u8ControlDCmotorSpeed(_spedd_t _speed_fan);
+
+#endif /* HAL_FAN_FAN_INTERFACE_H_ */

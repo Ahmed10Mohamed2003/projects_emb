@@ -1,0 +1,20 @@
+13:56:25 **** Build of configuration Debug for project EEPROM_Check_Eclipse_Project ****
+make all 
+Invoking: Print Size
+avr-size --format=avr --mcu=atmega32 EEPROM_Check_Eclipse_Project.elf
+AVR Memory Usage
+----------------
+Device: atmega32
+
+Program:   23328 bytes (71.2% Full)
+(.text + .data + .bootloader)
+
+Data:       1581 bytes (77.2% Full)
+(.data + .bss + .noinit)
+
+
+Finished building: sizedummy
+ 
+
+13:56:25 Build Finished (took 181ms)
+

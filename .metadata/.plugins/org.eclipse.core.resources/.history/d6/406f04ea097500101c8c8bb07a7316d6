@@ -1,0 +1,72 @@
+
+
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/TIMER1/TIMER1_interface.h"
+#include "MCAL/EXTI/EXTI_interface.h"
+#include "MCAL/EXTI/GI_interface.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include "DOOR_interface.h"
+#include "DOOR_config.h"
+#include "DOOR_private.h"
+
+
+volatile u8 mode=1;
+
+void Func(void)
+{
+	mode ^= 1;
+	if (mode==0)
+	{
+		Open_voidDoor();
+	}
+	else if (mode==1)
+	{
+		Close_voidDoor();
+	}
+}
+void Door_voidinit()
+{
+	    //DIO_voidInit();
+		TIMER1_voidInit();
+
+		DIO_u8SetPinDirection(DIO_u8_PORTB, DIO_u8_PIN2, DIO_u8_INPUT);   // INT0 button
+		DIO_u8SetPinValue(DIO_u8_PORTB, DIO_u8_PIN2, DIO_u8_HIGH);        // Pull-up
+	    DIO_u8SetPinDirection(DIO_u8_PORTD, DOOR_PIN, DIO_u8_OUTPUT);
+		//GI_voidEnable();
+		EXTI_voidEnableDisable(EXT_INT2, ENABLED);
+		EXTI_voidSetSenseCtrl(EXT_INT2, FALLING_EDGE);
+		EXTI_voidSetCallBack(EXT_INT2, Func);
+
+
+}
+
+
+
+void TIMER1_voidSetCompareValue(u16 Copy_u16Value)
+{
+	OCR1A=Copy_u16Value;
+}
+void Servo_voidSetAngle(u8 Copy_u8Angle)
+{
+        if (Copy_u8Angle > 180)
+            Copy_u8Angle = 180;
+
+
+
+      u16 Local_u16OCR1A = ((u32)Copy_u8Angle * 2000UL) / 180 + 2000;
+
+    TIMER1_voidSetCompareValue(Local_u16OCR1A);
+}
+void Open_voidDoor()
+{
+
+	TIMER1_voidInit();
+	 Servo_voidSetAngle(90);
+}
+void Close_voidDoor()
+{
+	TIMER1_voidInit();
+	 Servo_voidSetAngle(0);
+}
+

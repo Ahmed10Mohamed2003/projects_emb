@@ -1,0 +1,33 @@
+/*
+ * MQ2_program.c
+
+ *
+ *  Created on: 2 Aug 2025
+ *      Author: Ahmed Mokhtar
+ */
+#include <HAL/MQ2/MQ2_config.h>
+#include <HAL/MQ2/MQ2_interface.h>
+#include "LIB/STD_TYPES.h"
+#include "LIB/BIT_MATH.h"
+#include "MCAL/DIO/DIO_interface.h"
+#include"MCAL/DIO/DIO_private.h"
+#include <util/delay.h>
+#include "MCAL/DIO/DIO_interface.h"
+#include "MCAL/ADC/ADC_interface.h"
+#define GAS_THRESHOLD 1.5
+u8 MQ2_IsThereGasLeakage(void)
+{
+    ADC_voidInit();
+    DIO_u8SetPinDirection(DIO_u8_PORTA, MQ2_PIN, DIO_u8_INPUT);
+
+    u16 reading;
+    ADC_u16ConvertSynch(MQ2_PIN, &reading);
+
+    f32 voltage = (reading * V_REF) / 1023.0; // Convert ADC to volts
+
+    if (voltage > GAS_THRESHOLD)  // e.g., 2.0 volts
+        return 1; // Gas detected
+
+    return 0; // No gas
+}
+
